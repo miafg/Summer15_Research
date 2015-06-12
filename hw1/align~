@@ -1,0 +1,152 @@
+#!/usr/bin/env python
+import optparse
+import sys
+from collections import defaultdict
+
+optparser = optparse.OptionParser()
+optparser.add_option("-d", "--data", dest="train", default="data/hansards", help="Data filename prefix (default=data)")
+optparser.add_option("-e", "--english", dest="english", default="e", help="Suffix of English filename (default=e)")
+optparser.add_option("-f", "--french", dest="french", default="f", help="Suffix of French filename (default=f)")
+optparser.add_option("-t", "--threshold", dest="threshold", default=0.5, type="float", help="Threshold for aligning with Dice's coefficient (default=0.5)")
+optparser.add_option("-n", "--num_sentences", dest="num_sents", default=sys.maxint, type="int", help="Number of sentences to use for training and alignment")
+optparser.add_option( "--outFileEToF", dest="eToF", default='eToF.a', help="Name of output file for alignment English to French")
+optparser.add_option("--outFileFToE", dest="fToE", default='fToE.a', help="Name of output file for alignment French to English")
+(opts, _) = optparser.parse_args()
+f_data = "%s.%s" % (opts.train, opts.french)
+e_data = "%s.%s" % (opts.train, opts.english)
+
+fVocab = set()
+eVocab = set()
+
+#create an array of tuples, each containing one sentence pair
+bitext = [[(pair[0]).lower().strip().split(), (("NULL NULL NULL " + pair[1]).lower().strip()[:pair[1].find(" ")] + (pair[1]).lower().strip()[pair[1].find(" "):]).split()] for pair in zip(open(e_data), open(f_data))[:opts.num_sents]]
+
+#get the unique set of words for each language
+for (e, f)  in bitext:
+  for word in set(f):
+    fVocab.add(word)
+  for word in set(e):
+    eVocab.add(word)
+
+#the size of each vocabulary
+sizeF = len(fVocab)
+sizeE = len(eVocab)
+
+#TRANSLATION ALIGNMENT FROM FRENCH TO ENGLISH
+t_ef = defaultdict(int)
+fe_count = defaultdict(int)
+total = defaultdict(int)
+sTotal = defaultdict(int)
+#Initialize t_ef uniformly
+for (e, f) in bitext:
+  for e_i in set(e):
+    for f_j in set(f):
+      t_ef[e_i,f_j] = 1.0 / sizeE
+sys.stderr.write("Aligning from French to English\n")
+#while not converged
+i = 0
+while i < 5:
+  i += 1
+  sys.stderr.write("initializing totals and counts\n")
+  for (e, f) in bitext:
+    #initializing the totals and the counts
+    for e_i in set(e): 
+      for f_j in set(f):
+        fe_count[e_i,f_j] = 0.0
+  for f_j in fVocab:
+    total[f_j] = 0.0
+  #compute the normalization    
+  sys.stderr.write("computing normalization and collecting counts\n")
+  for (e, f) in bitext:
+    for e_i in set(e):
+      sTotal[e_i] = 0.0
+      for f_j in set(f):
+        sTotal[e_i] += t_ef[e_i,f_j] 
+    #collect counts
+    for e_i in set(e):
+      for f_j in set(f):
+        fe_count[e_i,f_j] += t_ef[e_i,f_j] / sTotal[e_i]
+        total[f_j] += t_ef[e_i,f_j] / sTotal[e_i]
+  #estimate probabilities
+  for k, (e, f) in enumerate(bitext): 
+    if k % 500 == 0:
+      sys.stderr.write(".")
+    for f_j in (f):
+      for e_i in (e): 
+        t_ef[e_i, f_j] = fe_count[e_i, f_j] / total[f_j]
+  sys.stderr.write("\nend of iteration %i\n"% (i - 1))
+sys.stderr.write("Writing to file\n")
+counter = 0
+temp = sys.stdout
+sys.stdout = file(opts.fToE, 'w') 
+for k, (e, f) in enumerate(bitext):
+  if k % 500 == 0:
+    sys.stderr.write(">")
+  for (i, e_i) in enumerate(e):
+    for (j, f_j) in enumerate(f):
+      if t_ef[e_i,f_j] >= 0.28:
+        sys.stdout.write("%i-%i " % (j,i))
+        counter += 1
+  sys.stdout.write("\n")
+sys.stderr.write("counter : %i\n"%counter)
+sys.stdout.close()
+sys.stdout = temp
+#TRANSLATION ALIGNMENT FROM ENGLISH TO FRENCH
+#create an array of tuples, each containing one sentence pair
+bitext = [[(("NULL NULL NULL " + pair[0]).lower().strip()[:pair[0].find(" ")] + (pair[0]).lower().strip()[pair[0].find(" "):]).split(), (pair[1]).lower().strip().split()] for pair in zip(open(e_data), open(f_data))[:opts.num_sents]]
+t_fe = defaultdict(int)
+sTotalEF = defaultdict(int)
+totalEF = defaultdict(int)
+ef_count = defaultdict(int)
+#Initialize t_ef uniformly
+for (e, f) in bitext:
+  for f_j in set(f):
+    for e_i in set(e):
+      t_fe[f_j,e_i] = 1.0 / sizeF
+sys.stderr.write("Aligning from English to French\n")
+#while not converged
+i = 0
+while i < 5:
+  i += 1
+  sys.stderr.write("initializing totals and counts\n")
+  for (e, f) in bitext:
+    #initializing the totals and the counts
+    for f_j in set(f): 
+      for e_i in set(e):
+        ef_count[f_j,e_i] = 0.0
+  for e_i in eVocab:
+    totalEF[e_i] = 0.0
+  #compute the normalization    
+  sys.stderr.write("computing normalization and collecting counts\n")
+  for (e, f) in bitext:
+    for f_j in set(f):
+      sTotalEF[f_j] = 0.0
+      for e_i in set(e):
+        sTotalEF[f_j] += t_fe[f_j,e_i] 
+    #collect counts
+    for f_j in set(f):
+      for e_i in set(e):
+        ef_count[f_j,e_i] += t_fe[f_j,e_i] / sTotalEF[f_j]
+        totalEF[e_i] += t_fe[f_j,e_i] / sTotalEF[f_j]
+  #estimate probabilities
+  for k, (e, f) in enumerate(bitext): 
+    if k % 500 == 0:
+      sys.stderr.write(".")
+    for f_j in (f):
+      for e_i in (e): 
+        t_fe[f_j,e_i] = ef_count[f_j, e_i] / totalEF[e_i]
+  sys.stderr.write("\nend of iteration %i\n"% (i - 1))
+sys.stderr.write("Writing to file\n")
+
+temp = sys.stdout
+sys.stdout = file(opts.eToF, 'w')
+for k, (e, f) in enumerate(bitext):
+  if k % 500 == 0:
+    sys.stderr.write(">")
+  for (i, f_j) in enumerate(f):
+    for (j, e_i) in enumerate(e):
+      if t_fe[f_j,e_i] >= 0.28:
+        sys.stdout.write("%i-%i " % (i,j))
+  sys.stdout.write("\n")
+sys.stdout.close()
+sys.stdout = temp

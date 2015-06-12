@@ -1,0 +1,31 @@
+#!/usr/bin/env python                                                                              
+import optparse
+import sys
+
+optparser = optparse.OptionParser()
+optparser.add_option("-x", "--alignmentsEToF", dest="aETOF", default="eToF.a", help="File name for alignments from English to French (default=eToF.a)")
+optparser.add_option("-y", "--alignmentsFToE", dest="aFTOE", default="fToE.a", help="File name for alignments from French to English(default=eToF.a)")
+(opts, args) = optparser.parse_args()
+optparser.add_option("-o", "--output", dest="out", default="output.a", help="File name for output file(default=output.a)")
+(opts, args) = optparser.parse_args()
+
+temp = sys.stdout
+sys.stdout = file(opts.out, 'w')
+
+for x, y in zip(open(opts.aETOF), open(opts.aFTOE)):
+    xList = x.strip().split()
+    yList = y.strip().split()
+    union = []
+    for pos in xList: 
+        if pos in union:
+            continue
+        union.append(pos)
+    for pos in yList:
+        if pos in union:
+            continue
+        union.append(pos)
+    for pair in union:
+        sys.stdout.write("%s " % pair)
+    sys.stdout.write("\n")
+sys.stdout.close()
+sys.stdout = temp
