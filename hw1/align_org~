@@ -15,7 +15,7 @@ e_data = "%s.%s" % (opts.train, opts.english)
 
 sys.stderr.write("Training with Dice's coefficient...")
 bitext = [[sentence.strip().split() for sentence in pair] for pair in zip(open(f_data), open(e_data))[:opts.num_sents]]
-sys.stderr.write(len(bitext))
+sys.stderr.write("%s"%len(bitext))
 f_count = defaultdict(int)
 e_count = defaultdict(int)
 fe_count = defaultdict(int)

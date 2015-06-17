@@ -19,7 +19,7 @@ fVocab = set()
 eVocab = set()
 
 #create an array of tuples, each containing one sentence pair                                     
-bitext = [[(pair[0]).lower().strip().split(), (("NULL NULL NULL NULL NULL" + pair[1]).lower().strip()[:pair[1].find(" ")] +(pair[1]).lower().strip()[pair[1].find(" "):]).split()] for pair in zip(open(e_data), open(f_data))[:opts.num_sents]]
+bitext = [[(pair[0]).lower().strip().split(), ((pair[1]).lower().strip()[:pair[1].find(" ")] +(pair[1]).lower().strip()[pair[1].find(" "):]).split()] for pair in zip(open(e_data), open(f_data))[:opts.num_sents]]
 
 #get the unique set of words for each language                                                    
 for (e, f)  in bitext:
@@ -151,10 +151,12 @@ for k, (e, f) in enumerate(bitext):
       if t_ef[e_j, f_i] >= 0.28:
         sys.stdout.write("%i-%i " % (i,j))
   sys.stdout.write("\n")
+sys.stdout.write("\n")
 sys.stdout.close()
 sys.stdout = temp
 
 #TRANSLATION FROM ENGLISH TO FRENCH
+bitext = [[((pair[0]).lower().strip()[:pair[0].find(" ")] + (pair[0]).lower().strip()[pair[0].find(" "):]).split(), (pair[1]).lower().strip().split()] for pair in zip(open(e_data), open(f_data))[:opts.num_sents]]
 t_fe = defaultdict(int)
 ef_count = defaultdict(int)
 totalEF = defaultdict(int)
