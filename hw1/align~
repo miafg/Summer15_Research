@@ -9,8 +9,8 @@ optparser.add_option("-e", "--english", dest="english", default="e", help="Suffi
 optparser.add_option("-f", "--french", dest="french", default="f", help="Suffix of French filename (default=f)")
 optparser.add_option("-t", "--threshold", dest="threshold", default=0.5, type="float", help="Threshold for aligning with Dice's coefficient (default=0.5)")
 optparser.add_option("-n", "--num_sentences", dest="num_sents", default=sys.maxint, type="int", help="Number of sentences to use for training and alignment")
-optparser.add_option( "--outFileEToF", dest="eToF", default='eToF.a', help="Name of output file for alignment English to French")
-optparser.add_option("--outFileFToE", dest="fToE", default='fToE.a', help="Name of output file for alignment French to English")
+optparser.add_option( "--outFileEToF", dest="eToF", default='eToFMod1.a', help="Name of output file for alignment English to French")
+optparser.add_option("--outFileFToE", dest="fToE", default='fToEMod1.a', help="Name of output file for alignment French to English")
 (opts, _) = optparser.parse_args()
 f_data = "%s.%s" % (opts.train, opts.french)
 e_data = "%s.%s" % (opts.train, opts.english)
@@ -20,7 +20,7 @@ eVocab = set()
 
 #create an array of tuples, each containing one sentence pair
 bitext = [[(pair[0]).lower().strip().split(), ((pair[1]).lower().strip()[:pair[1].find(" ")] +(pair[1]).lower().strip()[pair[1].find(" "):]).split()] for pair in zip(open(e_data), open(f_data))[:opts.num_sents]]
-
+print(bitext[4879])
 #get the unique set of words for each language
 for (e, f)  in bitext:
   for word in set(f):

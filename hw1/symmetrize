@@ -49,7 +49,7 @@ for align, sentences in textAl:
                             sys.stderr.write(".")
         sys.stderr.write("\n")
     j = 0
-    '''while (j < 1):
+    while (j < 1):
         j+= 1
         for eWord in range(0,len(sentences[0])):
             for fWord in range(0,len(sentences[0])):
@@ -58,7 +58,7 @@ for align, sentences in textAl:
                     aE.add(eWord)
                     aF.add(fWord)
                     sys.stderr.write(">")
-        sys.stderr.write("\n")'''
+        sys.stderr.write("\n")
     #write out the alignments to the output file
     for pair in alignment: 
         sys.stdout.write("%s "% pair)

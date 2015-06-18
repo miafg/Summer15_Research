@@ -1,0 +1,4 @@
+#!usr/bin/env python 
+import nltk                                                                                        
+from nltk.stem.snowball import EnglishStemmer                                                      
+from nltk.stem.snowball import FrenchStemmer   
