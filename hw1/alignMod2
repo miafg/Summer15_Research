@@ -74,7 +74,23 @@ while i < 5:
       for e_i in (e):
         t_ef[e_i, f_j] = fe_count[e_i, f_j] / total[f_j]
   sys.stderr.write("\nend of iteration %i\n"% (i - 1))
-sys.stderr.write("Writing to file\n")
+
+sys.stderr.write("Writing model 1 to file\n")
+temp = sys.stdout
+sys.stdout = file("fToEMod1Stem.a", 'w')
+for k, (e, f) in enumerate(bitext):
+  lf = len(set(e))
+  le = len(set(e))
+  if k % 500 == 0:
+    sys.stderr.write(">")
+  for (j, e_j) in enumerate(e):
+    for (i, f_i) in enumerate(f):
+      if t_ef[e_j, f_i] >= 0.28:
+        sys.stdout.write("%i-%i " % (i,j))
+  sys.stdout.write("\n")
+sys.stderr.write("\n")
+sys.stdout.close()
+sys.stdout = temp
 
 sys.stderr.write("Starting model 2\n")
 #Initialize a(i|j,le, lf) 
@@ -138,6 +154,7 @@ while k < 5:
         a[i, j, le, lf] = count_A[i, j, le, lf] / total_A[j, le, lf] 
   sys.stderr.write("\nend of iteration %i\n"% (k - 1))
 
+sys.stderr.write("Writing model 2 to file\n")
 temp = sys.stdout
 sys.stdout = file(opts.fToE, 'w')
 for k, (e, f) in enumerate(bitext):
@@ -150,7 +167,7 @@ for k, (e, f) in enumerate(bitext):
       if t_ef[e_j, f_i] >= 0.28:
         sys.stdout.write("%i-%i " % (i,j))
   sys.stdout.write("\n")
-sys.stdout.write("\n")
+sys.stderr.write("\n")
 sys.stdout.close()
 sys.stdout = temp
 
@@ -198,6 +215,23 @@ while i < 5:
       for e_i in (e):
         t_fe[f_j,e_i] = ef_count[f_j, e_i] / totalEF[e_i]
   sys.stderr.write("\nend of iteration %i\n"% (i - 1))
+
+sys.stderr.write("Writing model 1 to file\n")
+temp = sys.stdout
+sys.stdout = file("eToFMod1Stem.a", 'w')
+for k, (e, f) in enumerate(bitext):
+  lf = len(set(e))
+  le = len(set(e))
+  if k % 500 == 0:
+    sys.stderr.write(">")
+  for (j, e_j) in enumerate(e):
+    for (i, f_i) in enumerate(f):
+      if t_ef[e_j, f_i] >= 0.28:
+        sys.stdout.write("%i-%i " % (i,j))
+  sys.stdout.write("\n")
+sys.stderr.write("\n")
+sys.stdout.close()
+sys.stdout = temp
 
 sys.stderr.write("Starting model 2\n")
 #Initialize a(i|j,le, lf) 
@@ -262,6 +296,8 @@ while k < 5:
         a[j, i, lf, le] = count_A[j, i, lf, le] / total_A[i, lf, le] 
   sys.stderr.write("End of iteration #%i\n" % (k - 1))
 
+sys.stderr.write("Writing model 2 to file\n")
+
 temp = sys.stdout
 sys.stdout = file(opts.eToF, 'w')
 for k, (e, f) in enumerate(bitext):
@@ -274,5 +310,6 @@ for k, (e, f) in enumerate(bitext):
       if t_fe[f_i, e_j] >= 0.28:
         sys.stdout.write("%i-%i " % (i,j))
   sys.stdout.write("\n")
+sys.stderr.write("\n")
 sys.stdout.close()
 sys.stdout = temp
