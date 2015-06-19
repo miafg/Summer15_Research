@@ -1,0 +1,27 @@
+#!/usr/bin/env python                                                                                    
+import optparse
+import sys
+from collections import defaultdict
+
+he = set() 
+hf = set()
+hse = set()
+hsf = set()
+
+for sentence in open("data/hansards.e"):
+    for word in sentence.lower().strip().split():
+    	he.add(word)
+
+for sentence in open("data/hansards.f"):
+    for word in sentence.lower().strip().split():
+    	hf.add(word) 
+
+for sentence in open("hansardsStem.e"):
+    for word in sentence.lower().strip().split():
+    	hse.add(word)
+
+for sentence in open("hansardsStem.f"):
+    for word in sentence.lower().strip().split():
+    	hsf.add(word)
+
+sys.stderr.write("# unique words in hansards.e : %i\n# unique words in hansards.f : %i\n# unique words in hansardsStem.e : %i\n# unique words in hansardsStem.f : %i\n" % (len(he), len(hf), len(hse), len(hsf)))
